@@ -1,17 +1,17 @@
-## Hi there 👋
+# nikhileshsolai.github.io
 
-<!--
-**NikhileshSolai/NikhileshSolai** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Source for my personal site, live at https://nikhileshsolai.github.io
 
-Here are some ideas to get you started:
+Single static page (`index.html`, no build step) — the "grid-to-chip"
+narrative: power distribution background (Caterpillar → GM → Tesla),
+Purdue MEM, and the two portfolio projects (`grid-to-chip-calculator`,
+`ai-datacenter-power-tracker`).
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
-Hi is my website up?- please confirm at Nikhilesh27499@gmail.com
+`.nojekyll` tells GitHub Pages to serve `index.html` as-is instead of
+running it through Jekyll.
+
+## Before pushing
+
+Replace the placeholders in `index.html`:
+- `<your-linkedin>` in the Contact section — your LinkedIn handle
+- `<your-email>` in the Contact section — your email

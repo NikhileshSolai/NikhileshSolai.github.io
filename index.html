@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nikhilesh Solai — Grid-to-Chip</title>
+<meta name="description" content="Nikhilesh (Nikki) Solai — power distribution engineer working on the path from grid to chip in AI infrastructure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1014;
+    --surface:#161A21;
+    --surface-2:#1E232C;
+    --line:#2A303B;
+    --copper:#C8863A;
+    --copper-bright:#E8A855;
+    --signal:#5FC9A8;
+    --text:#EDE9E0;
+    --text-dim:#9AA3B2;
+    --text-faint:#5B6472;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:var(--copper-bright); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--signal);
+    outline-offset:3px;
+  }
+
+  .wrap{ max-width:960px; margin:0 auto; padding:0 24px; }
+
+  /* ---------- Nav ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(13,16,20,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:56px;
+  }
+  .nav-mark{
+    font-family:var(--font-mono); font-size:13px; color:var(--text-dim);
+    letter-spacing:0.02em;
+  }
+  .nav-mark b{ color:var(--copper-bright); font-weight:600; }
+  .nav-links{ display:flex; gap:28px; font-family:var(--font-mono); font-size:13px; }
+  .nav-links a{ color:var(--text-dim); margin-left:28px; }
+  .nav-links a:first-child{ margin-left:0; }
+  .nav-links a:hover{ color:var(--copper-bright); text-decoration:none; }
+
+  /* ---------- Hero / Datasheet header ---------- */
+  header.hero{
+    border-bottom:1px solid var(--line);
+    padding:56px 0 0;
+  }
+  .sheet-frame{
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box;
+    margin-bottom:-1px;
+  }
+  .sheet-row{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    padding:10px 20px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--font-mono); font-size:12px; color:var(--text-faint);
+    letter-spacing:0.03em;
+  }
+  .sheet-row span b{ color:var(--text-dim); font-weight:500; }
+
+  .hero-body{ padding:40px 20px 44px; }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; color:var(--copper);
+    letter-spacing:0.12em; text-transform:uppercase; margin:0 0 14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(32px, 6vw, 52px); line-height:1.05;
+    margin:0 0 16px; color:var(--text);
+  }
+  h1 .sub{ color:var(--text-dim); font-weight:500; display:block; font-size:0.5em; margin-top:10px; }
+  .hero-desc{
+    max-width:56ch; color:var(--text-dim); font-size:16px; margin:0 0 28px;
+  }
+  .hero-cta{ display:flex; gap:12px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--font-mono); font-size:13px;
+    padding:10px 18px; border-radius:2px; border:1px solid var(--line);
+    color:var(--text); transition:border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--copper); color:var(--copper-bright); text-decoration:none; }
+  .btn.primary{ background:var(--copper); border-color:var(--copper); color:#171008; font-weight:600; }
+  .btn.primary:hover{ background:var(--copper-bright); border-color:var(--copper-bright); color:#171008; }
+
+  /* ---------- Power chain diagram ---------- */
+  .chain-section{ padding:0 0 48px; }
+  .chain-label{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-faint);
+    text-align:center; margin:0 0 6px; letter-spacing:0.05em;
+  }
+  .chain-svg{ width:100%; height:auto; display:block; }
+  .chain-node text.tier-v{ font-family:'JetBrains Mono', monospace; }
+  .chain-node text.tier-name{ font-family:'Inter', sans-serif; }
+
+  @media (prefers-reduced-motion: no-preference){
+    .pulse{
+      stroke-dasharray: 6 14;
+      animation: dash 1.6s linear infinite;
+    }
+    @keyframes dash{ to { stroke-dashoffset: -40; } }
+  }
+
+  /* ---------- Section shell ---------- */
+  section{ padding:64px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:32px; }
+  .section-num{ font-family:var(--font-mono); font-size:13px; color:var(--copper); }
+  .section-title{ font-family:var(--font-display); font-size:24px; font-weight:600; margin:0; }
+  .section-note{ font-family:var(--font-mono); font-size:12px; color:var(--text-faint); margin-left:auto; }
+
+  /* ---------- About / revision table ---------- */
+  .rev-table{ width:100%; border-collapse:collapse; font-size:14px; }
+  .rev-table th{
+    text-align:left; font-family:var(--font-mono); font-weight:500; font-size:11px;
+    color:var(--text-faint); text-transform:uppercase; letter-spacing:0.06em;
+    padding:8px 12px; border-bottom:1px solid var(--line);
+  }
+  .rev-table td{
+    padding:14px 12px; border-bottom:1px solid var(--line); vertical-align:top;
+    color:var(--text-dim);
+  }
+  .rev-table tr:last-child td{ border-bottom:none; }
+  .rev-table td.stage{ font-family:var(--font-mono); color:var(--copper-bright); white-space:nowrap; }
+  .rev-table td.org{ color:var(--text); font-weight:500; }
+  .about-p{ color:var(--text-dim); max-width:70ch; margin:24px 0 0; font-size:15px; }
+
+  .credential-strip{
+    display:flex; gap:12px; flex-wrap:wrap; margin-top:24px;
+  }
+  .chip{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+    border:1px solid var(--line); border-radius:2px; padding:6px 12px;
+  }
+  .chip b{ color:var(--signal); font-weight:600; }
+
+  /* ---------- Projects ---------- */
+  .project-card{
+    border:1px solid var(--line); border-radius:2px; background:var(--surface);
+    margin-bottom:18px; overflow:hidden;
+  }
+  .project-head{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .project-name{ font-family:var(--font-mono); font-size:15px; font-weight:600; color:var(--text); }
+  .project-tag{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); }
+  .project-body{ padding:18px 20px 20px; }
+  .project-body p{ margin:0 0 14px; color:var(--text-dim); font-size:14.5px; max-width:68ch; }
+  .spec-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+    gap:10px 20px; margin:0 0 16px;
+    font-family:var(--font-mono); font-size:12.5px;
+  }
+  .spec-grid div span{ color:var(--text-faint); display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
+  .spec-grid div b{ color:var(--text-dim); font-weight:500; }
+
+  /* ---------- Footer ---------- */
+  footer{ padding:40px 0 60px; }
+  .footer-row{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  .footer-links{ display:flex; gap:20px; font-family:var(--font-mono); font-size:13px; }
+  .footer-links a{ margin-left:20px; }
+  .footer-links a:first-child{ margin-left:0; }
+  .footer-note{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-top:24px; }
+
+  @media (max-width:640px){
+    .nav-links{ gap:16px; font-size:12px; }
+    .sheet-row{ font-size:11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="nav-mark">GRID<b>→</b>CHIP</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="sheet-frame">
+      <div class="sheet-row">
+        <span><b>DOC</b> PORTFOLIO-001</span>
+        <span><b>REV</b> 2026.08</span>
+        <span><b>STATUS</b> ACTIVE</span>
+      </div>
+      <div class="hero-body">
+        <p class="eyebrow">Power Distribution &amp; AI Infrastructure</p>
+        <h1>Nikhilesh Solai
+          <span class="sub">Power delivery, from substation to silicon.</span>
+        </h1>
+        <p class="hero-desc">
+          Supplier Industrialization Engineer intern at Tesla, working on
+          low-voltage connectors and harnesses. MEM candidate at Purdue.
+          I design and reason about the hardware that moves power from
+          the grid to the load — now applying that to AI data centers,
+          where power delivery is the real bottleneck.
+        </p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#projects">See the projects</a>
+          <a class="btn" href="https://github.com/NikhileshSolai" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap chain-section">
+    <p class="chain-label">THE PATH THIS SITE IS NAMED FOR — ONE MEGAWATT-CLASS AI FACILITY, GRID TO GPU</p>
+    <svg class="chain-svg" viewBox="0 0 920 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram showing power stepping down from 138 kilovolt utility feed through medium voltage distribution, a facility transformer, and PDU busway, down to a 415 volt rack whip feeding the GPU.">
+      <line x1="60" y1="95" x2="860" y2="95" stroke="#2A303B" stroke-width="2"/>
+      <line class="pulse" x1="60" y1="95" x2="860" y2="95" stroke="#C8863A" stroke-width="2"/>
+
+      <!-- Node template: circle + voltage (mono) + name -->
+      <g class="chain-node">
+        <circle cx="60" cy="95" r="7" fill="#0D1014" stroke="#C8863A" stroke-width="2"/>
+        <text x="60" y="60" text-anchor="middle" class="tier-v" font-size="15" fill="#E8A855" font-weight="600">138 kV</text>
+        <text x="60" y="128" text-anchor="middle" class="tier-name" font-size="11" fill="#9AA3B2">Utility feed</text>
+      </g>
+
+      <g class="chain-node">
+        <circle cx="260" cy="95" r="7" fill="#0D1014" stroke="#C8863A" stroke-width="2"/>
+        <text x="260" y="60" text-anchor="middle" class="tier-v" font-size="15" fill="#E8A855" font-weight="600">13.8 kV</text>
+        <text x="260" y="128" text-anchor="middle" class="tier-name" font-size="11" fill="#9AA3B2">MV distribution</text>
+      </g>
+
+      <g class="chain-node">
+        <circle cx="460" cy="95" r="7" fill="#0D1014" stroke="#C8863A" stroke-width="2"/>
+        <text x="460" y="60" text-anchor="middle" class="tier-v" font-size="15" fill="#E8A855" font-weight="600">480 V</text>
+        <text x="460" y="128" text-anchor="middle" class="tier-name" font-size="11" fill="#9AA3B2">Facility transformer</text>
+      </g>
+
+      <g class="chain-node">
+        <circle cx="660" cy="95" r="7" fill="#0D1014" stroke="#C8863A" stroke-width="2"/>
+        <text x="660" y="60" text-anchor="middle" class="tier-v" font-size="15" fill="#E8A855" font-weight="600">415 V</text>
+        <text x="660" y="128" text-anchor="middle" class="tier-name" font-size="11" fill="#9AA3B2">PDU / busway</text>
+      </g>
+
+      <g class="chain-node">
+        <circle cx="860" cy="95" r="9" fill="#5FC9A8" stroke="#5FC9A8" stroke-width="2"/>
+        <text x="860" y="60" text-anchor="middle" class="tier-v" font-size="15" fill="#5FC9A8" font-weight="700">GPU</text>
+        <text x="860" y="128" text-anchor="middle" class="tier-name" font-size="11" fill="#9AA3B2">Rack / chip</text>
+      </g>
+    </svg>
+  </div>
+</header>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Background</h2>
+      <span class="section-note">CAREER — CHRONOLOGICAL</span>
+    </div>
+
+    <table class="rev-table">
+      <thead>
+        <tr><th>Stage</th><th>Organization</th><th>Focus</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="stage">01</td>
+          <td class="org">Caterpillar</td>
+          <td>Mechanical design &amp; electrification. Two patents pending on terminal assembly design.</td>
+        </tr>
+        <tr>
+          <td class="stage">02</td>
+          <td class="org">General Motors</td>
+          <td>Hydrogen fuel cell systems.</td>
+        </tr>
+        <tr>
+          <td class="stage">03</td>
+          <td class="org">Purdue University</td>
+          <td>Master of Engineering Management, graduating May 2027.</td>
+        </tr>
+        <tr>
+          <td class="stage">04</td>
+          <td class="org">Tesla</td>
+          <td>Supplier Industrialization Engineer intern — Power Distribution, Low Voltage Connectors &amp; Harnesses.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="about-p">
+      Every stage of that chain has been about the same underlying problem
+      at a different scale: getting power reliably from a source to a load,
+      through hardware that has to actually work in the field. AI
+      infrastructure is that problem again, just with a GPU instead of
+      an actuator on the other end — which is the throughline the two
+      projects below are built around.
+    </p>
+
+    <div class="credential-strip">
+      <span class="chip">Six Sigma <b>Green Belt</b></span>
+      <span class="chip">Ansys Mechanical / Fluent / Electronics Desktop / Maxwell / Icepak</span>
+      <span class="chip">2 Patents Pending — <b>Terminal Assembly</b></span>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Projects</h2>
+      <span class="section-note">GRID-TO-CHIP PORTFOLIO</span>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <span class="project-name">grid-to-chip-calculator</span>
+        <span class="project-tag">python · engineering calculator</span>
+      </div>
+      <div class="project-body">
+        <p>
+          Walks an AI data center's electrical load down through every
+          voltage tier — utility feed, MV distribution, facility
+          transformer, PDU/busway, rack whip — and sizes conductors and
+          breakers at each stage using real three-phase current formulas
+          and NEC-style continuous-duty derating. The same sizing problem
+          as a connector/harness spec, applied to hyperscaler scale.
+        </p>
+        <div class="spec-grid">
+          <div><span>Input</span><b>GPU count, TDP, PUE, redundancy</b></div>
+          <div><span>Output</span><b>Amperage &amp; breaker size per tier</b></div>
+          <div><span>Tests</span><b>9 passing unit tests</b></div>
+        </div>
+        <a class="btn" href="https://github.com/NikhileshSolai/grid-to-chip-calculator" target="_blank" rel="noopener">View repo ↗</a>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <span class="project-name">ai-datacenter-power-tracker</span>
+        <span class="project-tag">python · data dashboard</span>
+      </div>
+      <div class="project-body">
+        <p>
+          Tracks public EIA, DOE, IEA, and BloombergNEF figures on how AI
+          is reshaping U.S. and global electricity demand — the macro
+          trend behind the calculator above. Every number in the
+          dashboard links back to its original source.
+        </p>
+        <div class="spec-grid">
+          <div><span>Sources</span><b>EIA · DOE · IEA · BloombergNEF</b></div>
+          <div><span>Output</span><b>Chart grid + cited HTML report</b></div>
+          <div><span>Live data</span><b>Optional EIA API v2 pull</b></div>
+        </div>
+        <a class="btn" href="https://github.com/NikhileshSolai/ai-datacenter-power-tracker" target="_blank" rel="noopener">View repo ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Contact</h2>
+    </div>
+    <div class="footer-row">
+      <div class="footer-links">
+        <a href="https://github.com/NikhileshSolai" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/<your-linkedin>" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:<your-email>">Email</a>
+      </div>
+      <span class="section-note" style="margin-left:0;">nikhileshsolai.github.io</span>
+    </div>
+    <p class="footer-note">Built &amp; maintained by Nikhilesh Solai. Last revised 2026.08.</p>
+  </div>
+</footer>
+
+</body>
+</html>
